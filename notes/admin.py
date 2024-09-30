@@ -1,3 +1,10 @@
 from django.contrib import admin
 
-# Register your models here.
+from notes.models.notes import Notes
+
+
+@admin.register(Notes)
+class NotesAdmin(admin.ModelAdmin):
+    list_display = (
+        'name', 'body', 'owner', 'created_at', 'updated_at'
+    )

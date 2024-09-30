@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 import environ
 
@@ -31,6 +32,7 @@ INSTALLED_APPS += [
     'rest_framework',
     'django_filters',
     'corsheaders',
+    'djoser',
 ]
 
 # apps
@@ -62,7 +64,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'common', 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,6 +80,8 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 # Custom user model
 AUTH_USER_MODEL = 'users.User'
+# Custom user model
+AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend',)
 
 
 # Database
@@ -153,12 +157,13 @@ CSRF_COOKIE_SECURE = False
 #####################
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
         #'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
 
     'DEFAULT_PARSER_CLASSES': [
@@ -184,7 +189,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
 
     'SERVE_PERMISSIONS': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
 
     ],
 
@@ -199,4 +204,60 @@ SPECTACULAR_SETTINGS = {
 
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False
+}
+
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env.str('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = env.str('EMAIL_PORT', '587')
+EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', 'youremail@gg.com')
+EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', 'yourapppassword')
+EMAIL_USE_TLS = True
+
+
+#######################
+# DJOSER
+#######################
+DJOSER = {
+    #'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    #'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'SEND_ACTIVATION_EMAIL': True,
+    'SEND_CONFIRMATION_EMAIL': True,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.api.users.RegistrationSerializer',
+        'user': 'users.serializers.api.users.RegistrationSerializer',
+        'current_user': 'users.serializers.api.users.RegistrationSerializer',
+        'user_delete': 'djoser.serializers.UserDeleteSerializer',
+    },
+    'EMAIL': {
+        'activation': 'common.email.ActivationEmail'
+    },
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+
+    'JTI_CLAIM': 'jti',
+
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
 }
