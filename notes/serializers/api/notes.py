@@ -1,5 +1,6 @@
 import os
 from rest_framework import serializers
+from django.conf import settings
 
 from common.serializers.mixins import ExtendedModelSerializer
 from notes.models.notes import Notes
@@ -67,7 +68,6 @@ class NotesCreateSerializer(ExtendedModelSerializer):
 
         return super().create(validated_data)
 
-from django.conf import settings
 
 class NotesUpdateSerializer(ExtendedModelSerializer):
     text = serializers.CharField(write_only=True, required=True)
@@ -81,7 +81,7 @@ class NotesUpdateSerializer(ExtendedModelSerializer):
     
     def update(self, instance, validated_data):
         new_body = validated_data.pop('text', None)
-        # Замена удалением старого файла, если есть новый
+        # Replacing by deleting the old file if there is a new one
         if new_body is not None:
             os.remove(os.path.join(settings.MEDIA_ROOT, instance.body.name))
             new_file = markdown_in_file(new_body, 
