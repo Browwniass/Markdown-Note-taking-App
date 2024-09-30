@@ -157,7 +157,7 @@ CSRF_COOKIE_SECURE = False
 #####################
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -189,7 +189,7 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
 
     'SERVE_PERMISSIONS': [
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
 
     ],
 
